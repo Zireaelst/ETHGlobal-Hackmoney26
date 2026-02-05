@@ -1,0 +1,24 @@
+{
+    "name": "deepmind-vaults",
+    "version": "0.1.0",
+    "private": true,
+    "description": "AI-powered autonomous DeFi agents with Uniswap v4 and Sui DeepBook integration",
+    "scripts": {
+        "dev": "pnpm --filter web dev",
+        "build": "pnpm -r build",
+        "lint": "pnpm -r lint",
+        "test": "pnpm -r test",
+        "test:contracts": "cd packages/contracts && forge test -vvv",
+        "test:sui": "cd packages/sui-contracts/deepmind && sui move test",
+        "clean": "pnpm -r clean"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.0",
+        "prettier": "^3.2.4",
+        "typescript": "^5.3.3"
+    },
+    "packageManager": "pnpm@8.15.0",
+    "engines": {
+        "node": ">=20.0.0"
+    }
+}
