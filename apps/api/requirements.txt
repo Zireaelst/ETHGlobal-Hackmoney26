@@ -1,28 +1,18 @@
-# DeepMind Vaults API Dependencies
+# DeepMind Vaults API Dependencies (Minimal)
 
 # Core
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-python-dotenv==1.0.1
-pydantic==2.6.1
-pydantic-settings==2.1.0
+fastapi
+uvicorn[standard]
+python-dotenv
 
 # Web3
-web3==6.15.1
-eth-account==0.11.0
+web3
+eth-account
 
 # AI/LLM
-openai==1.12.0
-anthropic==0.18.1
+openai
+anthropic
 
 # Async HTTP
-aiohttp==3.9.3
-httpx==0.26.0
-
-# Database & Cache
-redis==5.0.1
-psycopg2-binary==2.9.9
-
-# Testing
-pytest==8.0.0
-pytest-asyncio==0.23.4
+aiohttp
+httpx
