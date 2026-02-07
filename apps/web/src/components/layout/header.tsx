@@ -9,7 +9,7 @@ import { WalletConnectButton } from '@/components/wallet/WalletConnectButton';
 const navLinks = [
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/agents', label: 'Agents' },
-    { href: '#', label: 'Docs' },
+    { href: '/docs', label: 'Docs' },
 ];
 
 export function Header() {
@@ -27,8 +27,8 @@ export function Header() {
     return (
         <header className="fixed top-0 left-0 right-0 z-50">
             <div className={`transition-all duration-300 ${scrolled
-                    ? 'bg-background/80 backdrop-blur-xl border-b border-white/10'
-                    : 'bg-transparent'
+                ? 'bg-background/80 backdrop-blur-xl border-b border-white/10'
+                : 'bg-transparent'
                 }`}>
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     {/* Logo */}
