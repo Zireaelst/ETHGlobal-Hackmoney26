@@ -34,7 +34,13 @@ async def lifespan(app: FastAPI):
         sui_rpc_url=os.getenv('SUI_RPC_URL', 'https://fullnode.testnet.sui.io')
     )
     
+    # Initialize decision engine (works without OpenAI key - uses rule-based fallback)
     decision_engine = AgentDecisionEngine()
+    
+    if decision_engine.is_platform_ai_available:
+        print("✅ Platform AI (GPT-4o) available")
+    else:
+        print("⚠️  No OpenAI key - using rule-based decisions (users can provide their own AI)")
     
     print("✅ Services initialized")
     
@@ -97,6 +103,18 @@ class OpportunityResponse(BaseModel):
 
 
 # ============ Endpoints ============
+
+@app.get("/")
+async def root():
+    """Root endpoint - API info"""
+    return {
+        "name": "DeepMind Vaults API",
+        "version": "1.0.0",
+        "status": "running",
+        "docs": "/docs",
+        "health": "/health"
+    }
+
 
 @app.get("/health")
 async def health_check():
