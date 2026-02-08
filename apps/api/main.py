@@ -254,7 +254,7 @@ async def get_all_agents():
     return [
         {
             "id": 1,
-            "ensName": "agent-1.deepmind.eth",
+            "ensName": "agent-1.moltqore.eth",
             "strategy": "aggressive",
             "reputation": 850,
             "winRate": 72.3,
@@ -262,7 +262,7 @@ async def get_all_agents():
         },
         {
             "id": 2,
-            "ensName": "agent-2.deepmind.eth",
+            "ensName": "agent-2.moltqore.eth",
             "strategy": "balanced",
             "reputation": 720,
             "winRate": 68.1,
@@ -270,7 +270,7 @@ async def get_all_agents():
         },
         {
             "id": 3,
-            "ensName": "agent-3.deepmind.eth",
+            "ensName": "agent-3.moltqore.eth",
             "strategy": "safe",
             "reputation": 680,
             "winRate": 65.5,
