@@ -215,7 +215,7 @@ function generateMarkdownReport(report: EvidenceReport): string {
 # Use frontend at http://localhost:3000/onboarding
 # Or call contract directly:
 cast send ${CONTRACTS.DeepMindVault} "mintAgent(string,bytes32,bytes32)" \\
-  "test-agent.deepmind.eth" \\
+  "test-agent.moltqore.eth" \\
   0x... \\
   0x... \\
   --rpc-url https://sepolia.base.org \\
