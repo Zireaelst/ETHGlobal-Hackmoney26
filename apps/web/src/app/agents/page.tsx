@@ -1,16 +1,64 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Bot, Plus, Settings, Pause, Play, TrendingUp, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Bot, Plus, Settings, Pause, Play, TrendingUp, ExternalLink, Loader2, X, Wallet } from 'lucide-react';
 import { Header } from '@/components/layout/header';
+import { useDeepMindVault, useUserAgents, useAgentBalance, Agent } from '@/hooks/useDeepMindVault';
+import { useAccount } from 'wagmi';
 
-const mockAgents = [
+// Strategy configurations
+const strategies = {
+    aggressive: { label: 'Aggressive', color: 'bg-red-500', textColor: 'text-red-400', description: '80% capital allocation, maximum fee capture' },
+    balanced: { label: 'Balanced', color: 'bg-accent-500', textColor: 'text-accent-400', description: '50% capital allocation, balanced risk/reward' },
+    safe: { label: 'Safe', color: 'bg-primary-500', textColor: 'text-primary-400', description: '30% capital allocation, capital preservation' },
+};
+
+// Strategy hash to name mapping
+const strategyFromHash = (hash: `0x${string}`) => {
+    // In production, compare against known hashes
+    const hashLower = hash.toLowerCase();
+    if (hashLower.includes('agg')) return 'aggressive';
+    if (hashLower.includes('bal')) return 'balanced';
+    return 'safe';
+};
+
+// Format agent for display
+const formatAgent = (agent: Agent, index: number) => ({
+    id: Number(agent.agentId),
+    name: `Agent-${agent.agentId}`,
+    ensName: `agent-${agent.agentId}.moltqore.eth`,
+    strategy: 'aggressive' as const, // Default, would parse from strategyHash
+    status: agent.isPaused ? 'paused' : 'active',
+    reputation: Number(agent.reputation),
+    totalValue: `$${(Number(agent.profitableTrades) * 50).toLocaleString()}`,
+    pnl: `+$${(Number(agent.profitableTrades) * 15).toLocaleString()}`,
+    pnlPercent: `+${(Number(agent.profitableTrades) / Math.max(1, Number(agent.totalTrades)) * 100).toFixed(1)}%`,
+    winRate: Number(agent.totalTrades) > 0
+        ? Math.round(Number(agent.profitableTrades) / Number(agent.totalTrades) * 100)
+        : 0,
+    totalTrades: Number(agent.totalTrades),
+    lastAction: formatTimeAgo(Number(agent.lastSyncTimestamp)),
+    suiVault: agent.suiVaultAddress.slice(0, 8) + '...' + agent.suiVaultAddress.slice(-4),
+});
+
+// Format timestamp to "X ago" 
+const formatTimeAgo = (timestamp: number) => {
+    const now = Math.floor(Date.now() / 1000);
+    const diff = now - timestamp;
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+    return `${Math.floor(diff / 86400)} days ago`;
+};
+
+// Fallback mock data for demo when wallet not connected
+const fallbackAgents = [
     {
         id: 1,
         name: 'Alpha-42',
-        ensName: 'alpha-42.deepmind.eth',
-        strategy: 'aggressive',
+        ensName: 'alpha-42.moltqore.eth',
+        strategy: 'aggressive' as const,
         status: 'active',
         reputation: 920,
         totalValue: '$12,400',
@@ -24,8 +72,8 @@ const mockAgents = [
     {
         id: 2,
         name: 'Beta-17',
-        ensName: 'beta-17.deepmind.eth',
-        strategy: 'balanced',
+        ensName: 'beta-17.moltqore.eth',
+        strategy: 'balanced' as const,
         status: 'active',
         reputation: 780,
         totalValue: '$8,200',
@@ -36,31 +84,44 @@ const mockAgents = [
         lastAction: '5 min ago',
         suiVault: '0x3a2c...9f1b',
     },
-    {
-        id: 3,
-        name: 'Gamma-8',
-        ensName: 'gamma-8.deepmind.eth',
-        strategy: 'conservative',
-        status: 'paused',
-        reputation: 650,
-        totalValue: '$4,050',
-        pnl: '+$340',
-        pnlPercent: '+9.2%',
-        winRate: 91,
-        totalTrades: 42,
-        lastAction: '1 hour ago',
-        suiVault: '0x9e4d...2a7c',
-    },
 ];
-
-const strategies = {
-    aggressive: { label: 'Aggressive', color: 'bg-red-500', textColor: 'text-red-400' },
-    balanced: { label: 'Balanced', color: 'bg-accent-500', textColor: 'text-accent-400' },
-    conservative: { label: 'Conservative', color: 'bg-primary-500', textColor: 'text-primary-400' },
-};
 
 export default function AgentsPage() {
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [selectedStrategy, setSelectedStrategy] = useState<'aggressive' | 'balanced' | 'safe'>('balanced');
+    const [agentName, setAgentName] = useState('');
+
+    // Wallet & Contract hooks
+    const { address, isConnected } = useAccount();
+    const { mintAgent, isLoading: isMinting, isConfirmed, txHash } = useDeepMindVault();
+    const { agents: contractAgents, isLoading: agentsLoading, count: agentCount } = useUserAgents(address);
+
+    // Use contract agents if connected, otherwise show demo data
+    const displayAgents = isConnected && contractAgents.length > 0
+        ? contractAgents.map((agent, i) => formatAgent(agent, i))
+        : fallbackAgents;
+
+    // Handle mint
+    const handleMint = async () => {
+        if (!agentName.trim()) return;
+
+        const result = await mintAgent({
+            ensName: `${agentName.toLowerCase().replace(/\s+/g, '-')}.moltqore.eth`,
+            strategy: selectedStrategy,
+        });
+
+        if (result.success) {
+            setShowCreateModal(false);
+            setAgentName('');
+        }
+    };
+
+    // Close modal on successful mint
+    useEffect(() => {
+        if (isConfirmed && txHash) {
+            setShowCreateModal(false);
+        }
+    }, [isConfirmed, txHash]);
 
     return (
         <div className="min-h-screen pb-20">
@@ -75,20 +136,47 @@ export default function AgentsPage() {
                 >
                     <div>
                         <h1 className="text-3xl font-bold text-white mb-2">AI Agents</h1>
-                        <p className="text-white/60">Manage your autonomous DeFi agents</p>
+                        <p className="text-white/60">
+                            {isConnected
+                                ? `Managing ${agentCount} agent${agentCount !== 1 ? 's' : ''} for ${address?.slice(0, 6)}...${address?.slice(-4)}`
+                                : 'Connect wallet to manage your autonomous DeFi agents'
+                            }
+                        </p>
                     </div>
                     <button
                         onClick={() => setShowCreateModal(true)}
                         className="btn-primary flex items-center gap-2 w-fit"
+                        disabled={!isConnected}
                     >
                         <Plus className="w-5 h-5" />
                         Create Agent
                     </button>
                 </motion.div>
 
+                {/* Connection Notice */}
+                {!isConnected && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-6 p-4 rounded-xl bg-accent-500/10 border border-accent-500/30 flex items-center gap-3"
+                    >
+                        <Wallet className="w-5 h-5 text-accent-400" />
+                        <span className="text-white/80">
+                            Connect your wallet to create and manage real AI agents. Showing demo data below.
+                        </span>
+                    </motion.div>
+                )}
+
+                {/* Loading State */}
+                {agentsLoading && isConnected && (
+                    <div className="flex justify-center py-12">
+                        <Loader2 className="w-8 h-8 text-accent-400 animate-spin" />
+                    </div>
+                )}
+
                 {/* Agents Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {mockAgents.map((agent, index) => (
+                    {displayAgents.map((agent, index) => (
                         <motion.div
                             key={agent.id}
                             initial={{ opacity: 0, y: 20 }}
@@ -116,72 +204,60 @@ export default function AgentsPage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${strategies[agent.strategy as keyof typeof strategies].color
-                                        } bg-opacity-20 ${strategies[agent.strategy as keyof typeof strategies].textColor}`}>
-                                        {strategies[agent.strategy as keyof typeof strategies].label}
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${strategies[agent.strategy].color} bg-opacity-20 ${strategies[agent.strategy].textColor}`}>
+                                        {strategies[agent.strategy].label}
                                     </span>
-                                    <span className={`px-2 py-1 rounded-full text-xs ${agent.status === 'active'
-                                            ? 'bg-green-500/20 text-green-400'
-                                            : 'bg-yellow-500/20 text-yellow-400'
-                                        }`}>
-                                        {agent.status === 'active' ? '● Active' : '◉ Paused'}
+                                    <span className={`px-2 py-1 rounded-full text-xs ${agent.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                                        {agent.status}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Stats Grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                <div className="bg-white/5 rounded-xl p-3">
-                                    <div className="text-white/50 text-xs mb-1">Total Value</div>
-                                    <div className="text-white font-semibold">{agent.totalValue}</div>
+                            <div className="grid grid-cols-3 gap-4 mb-6">
+                                <div>
+                                    <p className="text-white/50 text-xs mb-1">Total Value</p>
+                                    <p className="text-white font-semibold">{agent.totalValue}</p>
                                 </div>
-                                <div className="bg-white/5 rounded-xl p-3">
-                                    <div className="text-white/50 text-xs mb-1">P&L</div>
-                                    <div className="text-green-400 font-semibold">{agent.pnl}</div>
+                                <div>
+                                    <p className="text-white/50 text-xs mb-1">P&L</p>
+                                    <p className="text-green-400 font-semibold">{agent.pnl}</p>
                                 </div>
-                                <div className="bg-white/5 rounded-xl p-3">
-                                    <div className="text-white/50 text-xs mb-1">Win Rate</div>
-                                    <div className="text-white font-semibold">{agent.winRate}%</div>
-                                </div>
-                                <div className="bg-white/5 rounded-xl p-3">
-                                    <div className="text-white/50 text-xs mb-1">Reputation</div>
-                                    <div className="text-accent-400 font-semibold">{agent.reputation}/1000</div>
+                                <div>
+                                    <p className="text-white/50 text-xs mb-1">Win Rate</p>
+                                    <p className="text-white font-semibold">{agent.winRate}%</p>
                                 </div>
                             </div>
 
                             {/* Reputation Bar */}
-                            <div className="mb-6">
-                                <div className="flex items-center justify-between text-sm mb-2">
-                                    <span className="text-white/60">Reputation Score</span>
-                                    <span className="text-white/80">{agent.reputation}/1000</span>
+                            <div className="mb-4">
+                                <div className="flex justify-between text-xs mb-1">
+                                    <span className="text-white/50">Reputation</span>
+                                    <span className="text-accent-400">{agent.reputation}/1000</span>
                                 </div>
-                                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                                    <motion.div
-                                        className="h-full bg-gradient-to-r from-primary-500 to-accent-500"
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${(agent.reputation / 1000) * 100}%` }}
-                                        transition={{ duration: 1, ease: "easeOut" }}
+                                <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-primary-500 to-accent-500 rounded-full"
+                                        style={{ width: `${agent.reputation / 10}%` }}
                                     />
                                 </div>
                             </div>
 
                             {/* Footer */}
                             <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                                <div className="text-white/50 text-sm">
-                                    {agent.totalTrades} trades · Last active {agent.lastAction}
+                                <div className="text-xs text-white/50">
+                                    Last action: {agent.lastAction}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-                                        <Settings className="w-5 h-5 text-white/60" />
+                                    <button className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                                        <Settings className="w-4 h-4 text-white/60" />
                                     </button>
-                                    <button className={`p-2 rounded-lg transition-colors ${agent.status === 'active'
-                                            ? 'hover:bg-yellow-500/20 text-yellow-400'
-                                            : 'hover:bg-green-500/20 text-green-400'
-                                        }`}>
-                                        {agent.status === 'active' ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                                    </button>
-                                    <button className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white text-sm transition-colors">
-                                        View Details
+                                    <button className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                                        {agent.status === 'active' ? (
+                                            <Pause className="w-4 h-4 text-white/60" />
+                                        ) : (
+                                            <Play className="w-4 h-4 text-white/60" />
+                                        )}
                                     </button>
                                 </div>
                             </div>
@@ -189,79 +265,128 @@ export default function AgentsPage() {
                     ))}
                 </div>
 
-                {/* Create Agent CTA */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-8"
-                >
-                    <div
-                        onClick={() => setShowCreateModal(true)}
-                        className="card border-dashed border-2 border-white/20 hover:border-accent-500/50 cursor-pointer flex items-center justify-center py-12 transition-colors"
-                    >
-                        <div className="text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
-                                <Plus className="w-8 h-8 text-white/60" />
-                            </div>
-                            <h3 className="text-xl font-semibold text-white mb-2">Create New Agent</h3>
-                            <p className="text-white/50 max-w-sm">
-                                Deploy a new ERC-8004 agent NFT with custom strategy and Sui vault
-                            </p>
-                        </div>
-                    </div>
-                </motion.div>
-            </main>
-
-            {/* Create Modal Placeholder */}
-            {showCreateModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="glass-strong rounded-2xl p-6 max-w-lg w-full"
-                    >
-                        <h2 className="text-2xl font-bold text-white mb-6">Create New Agent</h2>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-white/70 text-sm mb-2 block">Agent Name</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g., Delta-99"
-                                    className="w-full px-4 py-3 bg-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-accent-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-white/70 text-sm mb-2 block">Strategy</label>
-                                <select className="w-full px-4 py-3 bg-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-accent-500">
-                                    <option value="aggressive">Aggressive (±5% range)</option>
-                                    <option value="balanced" selected>Balanced (±10% range)</option>
-                                    <option value="conservative">Conservative (±20% range)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-white/70 text-sm mb-2 block">Initial Deposit (USDC)</label>
-                                <input
-                                    type="number"
-                                    placeholder="1000"
-                                    className="w-full px-4 py-3 bg-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-accent-500"
-                                />
-                            </div>
-                        </div>
-                        <div className="flex gap-4 mt-8">
-                            <button
-                                onClick={() => setShowCreateModal(false)}
-                                className="flex-1 px-6 py-3 border border-white/20 rounded-xl text-white hover:bg-white/10 transition-colors"
+                {/* Create Agent Modal */}
+                <AnimatePresence>
+                    {showCreateModal && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                            onClick={() => setShowCreateModal(false)}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                className="bg-dark-800 border border-white/10 rounded-2xl p-6 w-full max-w-md"
+                                onClick={(e) => e.stopPropagation()}
                             >
-                                Cancel
-                            </button>
-                            <button className="flex-1 btn-primary">
-                                Create Agent
-                            </button>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-bold text-white">Create AI Agent</h2>
+                                    <button
+                                        onClick={() => setShowCreateModal(false)}
+                                        className="p-2 rounded-lg hover:bg-white/10"
+                                    >
+                                        <X className="w-5 h-5 text-white/60" />
+                                    </button>
+                                </div>
+
+                                {!isConnected ? (
+                                    <div className="text-center py-8">
+                                        <Wallet className="w-12 h-12 text-accent-400 mx-auto mb-4" />
+                                        <p className="text-white/60 mb-4">Connect your wallet to create an agent</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {/* Agent Name */}
+                                        <div className="mb-6">
+                                            <label className="block text-sm text-white/60 mb-2">Agent Name</label>
+                                            <input
+                                                type="text"
+                                                value={agentName}
+                                                onChange={(e) => setAgentName(e.target.value)}
+                                                placeholder="e.g. Alpha, Beta, Gamma"
+                                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-accent-500"
+                                            />
+                                            <p className="text-xs text-white/40 mt-1">
+                                                ENS: {agentName ? `${agentName.toLowerCase().replace(/\s+/g, '-')}.moltqore.eth` : 'your-agent.moltqore.eth'}
+                                            </p>
+                                        </div>
+
+                                        {/* Strategy Selection */}
+                                        <div className="mb-6">
+                                            <label className="block text-sm text-white/60 mb-2">Strategy</label>
+                                            <div className="space-y-2">
+                                                {(Object.keys(strategies) as Array<keyof typeof strategies>).map((key) => (
+                                                    <button
+                                                        key={key}
+                                                        onClick={() => setSelectedStrategy(key)}
+                                                        className={`w-full p-4 rounded-xl border transition-all ${selectedStrategy === key
+                                                            ? 'border-accent-500 bg-accent-500/10'
+                                                            : 'border-white/10 bg-white/5 hover:border-white/20'
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`w-3 h-3 rounded-full ${strategies[key].color}`} />
+                                                                <span className="text-white font-medium">{strategies[key].label}</span>
+                                                            </div>
+                                                            {selectedStrategy === key && (
+                                                                <div className="w-5 h-5 rounded-full bg-accent-500 flex items-center justify-center">
+                                                                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                    </svg>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-xs text-white/50 mt-2 text-left">{strategies[key].description}</p>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Submit Button */}
+                                        <button
+                                            onClick={handleMint}
+                                            disabled={isMinting || !agentName.trim()}
+                                            className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {isMinting ? (
+                                                <>
+                                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                                    Minting Agent NFT...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Bot className="w-5 h-5" />
+                                                    Mint Agent (ERC-8004)
+                                                </>
+                                            )}
+                                        </button>
+
+                                        {txHash && (
+                                            <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                                                <p className="text-green-400 text-sm">
+                                                    ✓ Transaction submitted!{' '}
+                                                    <a
+                                                        href={`https://sepolia.basescan.org/tx/${txHash}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="underline"
+                                                    >
+                                                        View on Basescan
+                                                    </a>
+                                                </p>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </main>
         </div>
     );
 }
