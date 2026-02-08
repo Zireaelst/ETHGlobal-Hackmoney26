@@ -39,7 +39,7 @@ export function AgentDecisionFeed({ agentId }: Props) {
                     </div>
                     <div>
                         <h2 className="text-xl font-bold text-white">Latest AI Decision</h2>
-                        <p className="text-white/50 text-sm">agent-{agentId}.deepmind.eth</p>
+                        <p className="text-white/50 text-sm">agent-{agentId}.moltqore.eth</p>
                     </div>
                 </div>
 
@@ -124,7 +124,7 @@ export function AgentDecisionFeed({ agentId }: Props) {
 
                     {/* View on ENS */}
                     <a
-                        href={`https://app.ens.domains/agent-${agentId}.deepmind.eth`}
+                        href={`https://app.ens.domains/agent-${agentId}.moltqore.eth`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 text-sm text-accent-400 hover:text-accent-300 font-medium py-3 border-t border-white/10"

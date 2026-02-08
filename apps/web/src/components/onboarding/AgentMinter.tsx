@@ -81,7 +81,7 @@ export function AgentMinter() {
         const prefixes = ['alpha', 'beta', 'gamma', 'delta', 'omega', 'sigma', 'theta'];
         const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
         const randomId = Math.floor(Math.random() * 1000);
-        setEnsName(`${prefix}-${randomId}.deepmind.eth`);
+        setEnsName(`${prefix}-${randomId}.moltqore.eth`);
     };
 
     // Auto-generate ENS name on mount
@@ -246,7 +246,7 @@ export function AgentMinter() {
                                         <input
                                             value={ensName}
                                             onChange={(e) => setEnsName(e.target.value)}
-                                            placeholder="agent-42.deepmind.eth"
+                                            placeholder="agent-42.moltqore.eth"
                                             className="flex-1 px-4 py-3 bg-black/50 border border-white/20 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-violet-500"
                                         />
                                         <button
