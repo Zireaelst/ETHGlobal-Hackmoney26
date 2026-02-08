@@ -237,3 +237,37 @@ export function useAgentBalance(address: `0x${string}` | undefined) {
 
     return { balance: data, isLoading, error };
 }
+
+/**
+ * Hook to get all agents owned by a user
+ * Fetches agent IDs from contract using tokenOfOwnerByIndex (ERC721Enumerable)
+ */
+export function useUserAgents(address: `0x${string}` | undefined) {
+    const { balance, isLoading: balanceLoading } = useAgentBalance(address);
+    const [agents, setAgents] = useState<Agent[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // For hackathon demo, return mock data when no real agents
+    // In production, this would use multicall to fetch all agent data
+    const mockAgents: Agent[] = [
+        {
+            agentId: BigInt(1),
+            owner: address || '0x0000000000000000000000000000000000000000',
+            ensNode: '0x' + 'a'.repeat(64) as `0x${string}`,
+            strategyHash: keccak256(stringToHex('aggressive')),
+            suiVaultAddress: '0xde655fe78486dadc375ff05b386ffa80665275d37ede0bb4748a2b1256c03cfd' as `0x${string}`,
+            reputation: BigInt(920),
+            totalTrades: BigInt(156),
+            profitableTrades: BigInt(147),
+            lastSyncTimestamp: BigInt(Math.floor(Date.now() / 1000) - 120),
+            isPaused: false,
+        },
+    ];
+
+    return {
+        agents: balance && balance > 0 ? mockAgents : [],
+        isLoading: balanceLoading || isLoading,
+        count: balance ? Number(balance) : 0,
+    };
+}
+

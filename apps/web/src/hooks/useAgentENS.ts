@@ -122,7 +122,7 @@ export function useLogDecisionToENS() {
  * Hook to get agent's latest decision from ENS text records
  */
 export function useAgentDecision(agentId: number): AgentDecision & { isLoading: boolean } {
-    const ensName = `agent-${agentId}.deepmind.eth`;
+    const ensName = `agent-${agentId}.moltqore.eth`;
     const node = namehash(ensName);
 
     const { data: lastDecision, isLoading: loadingDecision } = useReadContract({
@@ -166,7 +166,7 @@ export function useAgentDecision(agentId: number): AgentDecision & { isLoading: 
  * Hook to get agent's performance metrics from ENS
  */
 export function useAgentPerformance(agentId: number): AgentPerformance & { isLoading: boolean } {
-    const ensName = `agent-${agentId}.deepmind.eth`;
+    const ensName = `agent-${agentId}.moltqore.eth`;
     const node = namehash(ensName);
 
     const { data: reputation, isLoading: loadingRep } = useReadContract({
@@ -210,7 +210,7 @@ export function useAgentPerformance(agentId: number): AgentPerformance & { isLoa
  * Hook to get agent's vault addresses
  */
 export function useAgentVaultAddresses(agentId: number): AgentVaultAddresses {
-    const ensName = `agent-${agentId}.deepmind.eth`;
+    const ensName = `agent-${agentId}.moltqore.eth`;
     const node = namehash(ensName);
 
     const { data: suiVault } = useReadContract({
@@ -242,7 +242,7 @@ export function useAllAgents() {
         return [
             {
                 id: 1,
-                ensName: 'agent-1.deepmind.eth',
+                ensName: 'agent-1.moltqore.eth',
                 strategy: 'aggressive',
                 reputation: 850,
                 winRate: 72.3,
@@ -250,7 +250,7 @@ export function useAllAgents() {
             },
             {
                 id: 2,
-                ensName: 'agent-2.deepmind.eth',
+                ensName: 'agent-2.moltqore.eth',
                 strategy: 'balanced',
                 reputation: 720,
                 winRate: 68.1,
@@ -258,7 +258,7 @@ export function useAllAgents() {
             },
             {
                 id: 3,
-                ensName: 'agent-3.deepmind.eth',
+                ensName: 'agent-3.moltqore.eth',
                 strategy: 'safe',
                 reputation: 680,
                 winRate: 65.5,
