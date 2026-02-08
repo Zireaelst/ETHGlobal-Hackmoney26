@@ -91,7 +91,7 @@ contract DeepMindVault is ERC721, IERC8004, Ownable {
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Mint a new agent NFT
-    /// @param ensName ENS name (e.g., "agent-42.deepmind.eth")
+    /// @param ensName ENS name (e.g., "agent-42.moltqore.eth")
     /// @param strategyHash IPFS hash of strategy configuration
     /// @param suiVaultAddress Sui vault object ID
     /// @return agentId The minted agent's ID

@@ -72,7 +72,7 @@ contract ENSTextRecordManager is Ownable {
 
     /// @notice Register agent with ENS name
     /// @param agentId Agent NFT ID
-    /// @param ensName Full ENS name (e.g., "agent-42.deepmind.eth")
+    /// @param ensName Full ENS name (e.g., "agent-42.moltqore.eth")
     function registerAgentENS(
         uint256 agentId,
         string memory ensName
