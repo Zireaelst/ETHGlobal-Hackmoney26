@@ -33,8 +33,12 @@ export function Header() {
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center shadow-glow-sm group-hover:shadow-glow-md transition-shadow">
-                            <Brain className="w-6 h-6 text-white" />
+                        <div className="w-10 h-10 rounded-xl overflow-hidden shadow-glow-sm group-hover:shadow-glow-md transition-shadow">
+                            <img
+                                src="/moltqore-logo.png"
+                                alt="MoltQore Logo"
+                                className="w-full h-full object-contain"
+                            />
                         </div>
                         <span className="font-bold text-xl text-white hidden sm:block">
                             MoltQore
