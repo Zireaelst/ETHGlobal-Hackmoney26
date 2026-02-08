@@ -1,7 +1,11 @@
 'use client';
 
-import { useReadContract } from 'wagmi';
+import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { baseSepolia } from 'wagmi/chains';
 import useSWR from 'swr';
+import { useState, useCallback } from 'react';
+import { keccak256 as viemKeccak256, stringToHex, concat, toHex } from 'viem';
+import { ENS_TEXT_RECORD_MANAGER_ADDRESS, ENS_TEXT_RECORD_MANAGER_ABI } from '@/abi';
 
 // Interfaces
 interface AgentDecision {
@@ -46,29 +50,72 @@ const ENS_RESOLVER_ABI = [
     }
 ] as const;
 
-// ENS Public Resolver address (mainnet)
+// ENS Public Resolver address (Base Sepolia)
 const ENS_RESOLVER = '0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41';
 
-// Convert ENS name to namehash
+// Convert ENS name to namehash (using viem)
 function namehash(name: string): `0x${string}` {
-    let node = '0x0000000000000000000000000000000000000000000000000000000000000000';
+    let node: `0x${string}` = '0x0000000000000000000000000000000000000000000000000000000000000000';
     if (name) {
         const labels = name.split('.');
         for (let i = labels.length - 1; i >= 0; i--) {
             const label = labels[i];
             if (label) {
-                const labelHash = keccak256(label);
-                node = keccak256(node + labelHash.slice(2));
+                const labelHash = viemKeccak256(stringToHex(label));
+                node = viemKeccak256(concat([node, labelHash]));
             }
         }
     }
-    return node as `0x${string}`;
+    return node;
 }
 
-// Simple keccak256 (for demo - use viem/ethers in production)
-function keccak256(input: string): string {
-    // Placeholder - in production use proper keccak256
-    return '0x' + Array(64).fill('0').join('');
+/**
+ * Hook to write decision to ENS text records
+ */
+export function useLogDecisionToENS() {
+    const [isLoading, setIsLoading] = useState(false);
+    const [txHash, setTxHash] = useState<`0x${string}` | undefined>();
+
+    const { writeContractAsync } = useWriteContract();
+    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+        hash: txHash,
+    });
+
+    const logDecision = useCallback(async (
+        agentId: bigint,
+        action: string,
+        reasoning: string,
+        profitLoss: bigint
+    ) => {
+        setIsLoading(true);
+
+        try {
+            const hash = await writeContractAsync({
+                address: ENS_TEXT_RECORD_MANAGER_ADDRESS,
+                abi: ENS_TEXT_RECORD_MANAGER_ABI,
+                functionName: 'logDecisionToENS',
+                args: [agentId, action, reasoning, profitLoss],
+                chain: baseSepolia,
+            });
+
+            setTxHash(hash);
+            console.log('📝 Decision logged to ENS:', hash);
+
+            return { hash, success: true };
+        } catch (error) {
+            console.error('❌ Log decision failed:', error);
+            return { error, success: false };
+        } finally {
+            setIsLoading(false);
+        }
+    }, [writeContractAsync]);
+
+    return {
+        logDecision,
+        isLoading: isLoading || isConfirming,
+        isConfirmed,
+        txHash,
+    };
 }
 
 /**

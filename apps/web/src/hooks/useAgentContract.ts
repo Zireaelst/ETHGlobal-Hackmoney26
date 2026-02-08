@@ -143,7 +143,14 @@ export interface AgentData {
 /**
  * Hook to mint a new agent NFT
  */
-export function useMintAgent() {
+export function useMintAgent(): {
+    mint: (ensName: string, strategy: string, suiVaultId?: string) => void;
+    hash: `0x${string}` | undefined;
+    isPending: boolean;
+    isConfirming: boolean;
+    isSuccess: boolean;
+    error: Error | null;
+} {
     const { writeContract, data: hash, isPending, error } = useWriteContract();
 
     const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -177,7 +184,14 @@ export function useMintAgent() {
 /**
  * Hook to delegate a session key for autonomous agent actions
  */
-export function useDelegateSessionKey() {
+export function useDelegateSessionKey(): {
+    delegate: (agentId: bigint, sessionKey: `0x${string}`, expiryDays?: number) => void;
+    hash: `0x${string}` | undefined;
+    isPending: boolean;
+    isConfirming: boolean;
+    isSuccess: boolean;
+    error: Error | null;
+} {
     const { writeContract, data: hash, isPending, error } = useWriteContract();
 
     const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -201,7 +215,14 @@ export function useDelegateSessionKey() {
 /**
  * Hook to update agent strategy
  */
-export function useUpdateStrategy() {
+export function useUpdateStrategy(): {
+    updateStrategy: (agentId: bigint, newStrategy: string) => void;
+    hash: `0x${string}` | undefined;
+    isPending: boolean;
+    isConfirming: boolean;
+    isSuccess: boolean;
+    error: Error | null;
+} {
     const { writeContract, data: hash, isPending, error } = useWriteContract();
 
     const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -225,7 +246,14 @@ export function useUpdateStrategy() {
 /**
  * Hook to pause an agent
  */
-export function usePauseAgent() {
+export function usePauseAgent(): {
+    pause: (agentId: bigint) => void;
+    hash: `0x${string}` | undefined;
+    isPending: boolean;
+    isConfirming: boolean;
+    isSuccess: boolean;
+    error: Error | null;
+} {
     const { writeContract, data: hash, isPending, error } = useWriteContract();
 
     const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -247,7 +275,14 @@ export function usePauseAgent() {
 /**
  * Hook to resume a paused agent
  */
-export function useResumeAgent() {
+export function useResumeAgent(): {
+    resume: (agentId: bigint) => void;
+    hash: `0x${string}` | undefined;
+    isPending: boolean;
+    isConfirming: boolean;
+    isSuccess: boolean;
+    error: Error | null;
+} {
     const { writeContract, data: hash, isPending, error } = useWriteContract();
 
     const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
