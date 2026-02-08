@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Book, Code, Cpu, Shield, Zap, ExternalLink, ChevronRight } from 'lucide-react';
+import { Book, Code, Cpu, Shield, Zap, ExternalLink, ChevronRight, ArrowRightLeft } from 'lucide-react';
 
 export const metadata: Metadata = {
-    title: 'Documentation | DeepMind Vaults',
+    title: 'Documentation | MoltQore',
     description: 'Learn how to create and manage AI-powered autonomous DeFi agents',
 };
 
@@ -23,6 +23,7 @@ const sections = [
         items: [
             { name: 'DeepMindVault (ERC-8004)', href: '#deepmind-vault' },
             { name: 'ENS Text Records', href: '#ens-records' },
+            { name: 'Uniswap v4 Hook', href: '#uniswap-hook' },
             { name: 'Sui Agent Vault', href: '#sui-vault' },
         ],
     },
@@ -37,6 +38,42 @@ const sections = [
     },
 ];
 
+// Deployed contracts
+const contracts = {
+    baseSepolia: [
+        {
+            name: 'DeepMindVault.sol',
+            address: '0xbAD7056563F0b00C29c08FF06CA22aE94cC5fa1c',
+            description: 'ERC-8004 compliant NFT contract for AI agents.',
+            explorer: 'https://sepolia.basescan.org/address/0xbAD7056563F0b00C29c08FF06CA22aE94cC5fa1c',
+        },
+        {
+            name: 'ENSTextRecordManager.sol',
+            address: '0xab8Fa229B57513d3EB11549AC4641FF1F4f469a3',
+            description: 'Logs agent decisions to ENS text records for transparency.',
+            explorer: 'https://sepolia.basescan.org/address/0xab8Fa229B57513d3EB11549AC4641FF1F4f469a3',
+        },
+        {
+            name: 'MockPublicResolver.sol',
+            address: '0xD257737006c06C99709513A0491D585D5689316b',
+            description: 'ENS text record storage for demo environment.',
+            explorer: 'https://sepolia.basescan.org/address/0xD257737006c06C99709513A0491D585D5689316b',
+        },
+        {
+            name: 'AgentRebalancerHook.sol',
+            address: '0xdB045ac6bA8d7903fD3a566bFBf208955481dA49',
+            description: 'Uniswap v4 hook for autonomous LP rebalancing.',
+            explorer: 'https://sepolia.basescan.org/address/0xdB045ac6bA8d7903fD3a566bFBf208955481dA49',
+        },
+    ],
+    sui: {
+        name: 'agent_vault.move',
+        packageId: '0x6ce7728c4d4201c1ea33154063b1fa3e810dae604e88d5a3054c9e662cec7ef8',
+        description: 'Sui Move contract for market making and arbitrage on DeepBook.',
+        explorer: 'https://suiscan.xyz/testnet/object/0x6ce7728c4d4201c1ea33154063b1fa3e810dae604e88d5a3054c9e662cec7ef8',
+    },
+};
+
 export default function DocsPage() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#0a0a0f] to-[#0f0f1a]">
@@ -44,8 +81,10 @@ export default function DocsPage() {
             <header className="border-b border-white/10 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-lg" />
-                        <span className="font-bold text-white">DeepMind Vaults</span>
+                        <div className="w-8 h-8 rounded-lg overflow-hidden">
+                            <img src="/moltqore-logo.png" alt="MoltQore" className="w-full h-full object-contain" />
+                        </div>
+                        <span className="font-bold text-white">MoltQore</span>
                     </Link>
                     <nav className="flex items-center gap-6">
                         <Link href="/dashboard" className="text-white/60 hover:text-white text-sm">Dashboard</Link>
@@ -103,7 +142,7 @@ export default function DocsPage() {
                         </h2>
                         <div className="prose prose-invert max-w-none">
                             <p className="text-white/70 leading-relaxed">
-                                DeepMind Vaults enables you to create autonomous AI agents that manage DeFi positions across multiple chains.
+                                MoltQore enables you to create autonomous AI agents that manage DeFi positions across multiple chains.
                                 Each agent is represented as an <strong className="text-white">ERC-8004 NFT</strong> on Base and can execute strategies on both
                                 Uniswap v4 (EVM) and Sui DeepBook (Move).
                             </p>
@@ -140,8 +179,8 @@ export default function DocsPage() {
                             </div>
                             <pre className="p-4 text-sm text-green-400 overflow-x-auto">
                                 {`# Clone the repository
-git clone https://github.com/deepmind-vaults/deepmind-vaults.git
-cd deepmind-vaults
+git clone https://github.com/moltqore/moltqore.git
+cd moltqore
 
 # Install dependencies
 pnpm install
@@ -149,8 +188,8 @@ pnpm install
 # Start frontend
 cd apps/web && pnpm dev
 
-# Start backend (optional - for AI features)
-cd apps/api && source venv/bin/activate && uvicorn main:app --reload`}
+# Run demo script (shows all 6 real transactions)
+./scripts/demo-flow.sh`}
                             </pre>
                         </div>
                     </section>
@@ -159,41 +198,21 @@ cd apps/api && source venv/bin/activate && uvicorn main:app --reload`}
                     <section id="create-agent" className="mb-16">
                         <h2 className="text-2xl font-bold text-white mb-4">Create Your First Agent</h2>
                         <div className="space-y-4">
-                            <div className="flex gap-4 items-start">
-                                <div className="w-8 h-8 bg-violet-500/20 rounded-full flex items-center justify-center text-violet-400 font-bold shrink-0">1</div>
-                                <div>
-                                    <h3 className="font-semibold text-white">Connect Wallet</h3>
-                                    <p className="text-white/50 text-sm mt-1">Connect your MetaMask or WalletConnect wallet on Base Sepolia network.</p>
+                            {[
+                                { step: 1, title: 'Connect Wallet', desc: 'Connect your MetaMask or WalletConnect wallet on Base Sepolia network.' },
+                                { step: 2, title: 'Choose Strategy', desc: 'Select Safe (5-8% APR), Balanced (10-15%), or Aggressive (20-35%).' },
+                                { step: 3, title: 'Select AI Provider', desc: 'Use Platform AI (default) or bring your own AI (OpenAI, OpenClaw, Custom).' },
+                                { step: 4, title: 'Mint Agent NFT', desc: 'Your ERC-8004 agent NFT is minted on Base Sepolia.' },
+                                { step: 5, title: 'Fund & Activate', desc: 'Deposit USDC and your agent starts executing autonomously.' },
+                            ].map(({ step, title, desc }) => (
+                                <div key={step} className="flex gap-4 items-start">
+                                    <div className="w-8 h-8 bg-violet-500/20 rounded-full flex items-center justify-center text-violet-400 font-bold shrink-0">{step}</div>
+                                    <div>
+                                        <h3 className="font-semibold text-white">{title}</h3>
+                                        <p className="text-white/50 text-sm mt-1">{desc}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex gap-4 items-start">
-                                <div className="w-8 h-8 bg-violet-500/20 rounded-full flex items-center justify-center text-violet-400 font-bold shrink-0">2</div>
-                                <div>
-                                    <h3 className="font-semibold text-white">Choose Strategy</h3>
-                                    <p className="text-white/50 text-sm mt-1">Select Safe (5-8% APR), Balanced (10-15%), or Aggressive (20-35%).</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-4 items-start">
-                                <div className="w-8 h-8 bg-violet-500/20 rounded-full flex items-center justify-center text-violet-400 font-bold shrink-0">3</div>
-                                <div>
-                                    <h3 className="font-semibold text-white">Select AI Provider</h3>
-                                    <p className="text-white/50 text-sm mt-1">Use Platform AI (default) or bring your own AI (OpenAI, OpenClaw, Custom).</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-4 items-start">
-                                <div className="w-8 h-8 bg-violet-500/20 rounded-full flex items-center justify-center text-violet-400 font-bold shrink-0">4</div>
-                                <div>
-                                    <h3 className="font-semibold text-white">Mint Agent NFT</h3>
-                                    <p className="text-white/50 text-sm mt-1">Your ERC-8004 agent NFT is minted on Base Sepolia.</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-4 items-start">
-                                <div className="w-8 h-8 bg-violet-500/20 rounded-full flex items-center justify-center text-violet-400 font-bold shrink-0">5</div>
-                                <div>
-                                    <h3 className="font-semibold text-white">Fund & Activate</h3>
-                                    <p className="text-white/50 text-sm mt-1">Deposit USDC and your agent starts executing autonomously.</p>
-                                </div>
-                            </div>
+                            ))}
                         </div>
                     </section>
 
@@ -205,66 +224,86 @@ cd apps/api && source venv/bin/activate && uvicorn main:app --reload`}
                         </h2>
 
                         <div className="space-y-6">
-                            {/* DeepMindVault */}
-                            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-lg font-semibold text-white">DeepMindVault.sol</h3>
-                                    <a
-                                        href="https://sepolia.basescan.org/address/0xbAD7056563F0b00C29c08FF06CA22aE94cC5fa1c"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-1 text-sm text-violet-400 hover:text-violet-300"
-                                    >
-                                        View on BaseScan <ExternalLink className="w-3 h-3" />
-                                    </a>
-                                </div>
-                                <p className="text-white/60 text-sm mb-4">ERC-8004 compliant NFT contract for AI agents.</p>
-                                <div className="bg-black/50 rounded-lg p-3">
-                                    <code className="text-xs text-green-400">
-                                        0xbAD7056563F0b00C29c08FF06CA22aE94cC5fa1c
-                                    </code>
-                                </div>
-                            </div>
-
-                            {/* ENS Manager */}
-                            <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-lg font-semibold text-white">ENSTextRecordManager.sol</h3>
-                                    <a
-                                        href="https://sepolia.basescan.org/address/0x10E15C7a3Bce8211c5EBbAdB2f478e1Fe0240b1c"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-1 text-sm text-violet-400 hover:text-violet-300"
-                                    >
-                                        View on BaseScan <ExternalLink className="w-3 h-3" />
-                                    </a>
-                                </div>
-                                <p className="text-white/60 text-sm mb-4">Logs agent decisions to ENS text records for transparency.</p>
-                                <div className="bg-black/50 rounded-lg p-3">
-                                    <code className="text-xs text-green-400">
-                                        0x10E15C7a3Bce8211c5EBbAdB2f478e1Fe0240b1c
-                                    </code>
+                            {/* Base Sepolia Contracts */}
+                            <div className="mb-4">
+                                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-blue-400 rounded-full" />
+                                    Base Sepolia
+                                </h3>
+                                <div className="space-y-4">
+                                    {contracts.baseSepolia.map((contract) => (
+                                        <div key={contract.address} id={contract.name.includes('ENS') ? 'ens-records' : contract.name.includes('Hook') ? 'uniswap-hook' : undefined} className="bg-white/5 border border-white/10 rounded-xl p-6">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h4 className="text-lg font-semibold text-white">{contract.name}</h4>
+                                                <a
+                                                    href={contract.explorer}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-1 text-sm text-violet-400 hover:text-violet-300"
+                                                >
+                                                    View on BaseScan <ExternalLink className="w-3 h-3" />
+                                                </a>
+                                            </div>
+                                            <p className="text-white/60 text-sm mb-4">{contract.description}</p>
+                                            <div className="bg-black/50 rounded-lg p-3">
+                                                <code className="text-xs text-green-400">
+                                                    {contract.address}
+                                                </code>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
-                            {/* Sui Vault */}
-                            <div id="sui-vault" className="bg-white/5 border border-white/10 rounded-xl p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-lg font-semibold text-white">agent_vault.move</h3>
-                                    <a
-                                        href="https://suiscan.xyz/testnet/object/0x6ce7728c4d4201c1ea33154063b1fa3e810dae604e88d5a3054c9e662cec7ef8"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-1 text-sm text-violet-400 hover:text-violet-300"
-                                    >
-                                        View on SuiScan <ExternalLink className="w-3 h-3" />
-                                    </a>
+                            {/* Sui Testnet */}
+                            <div>
+                                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-cyan-400 rounded-full" />
+                                    Sui Testnet
+                                </h3>
+                                <div id="sui-vault" className="bg-white/5 border border-white/10 rounded-xl p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h4 className="text-lg font-semibold text-white">{contracts.sui.name}</h4>
+                                        <a
+                                            href={contracts.sui.explorer}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-1 text-sm text-violet-400 hover:text-violet-300"
+                                        >
+                                            View on SuiScan <ExternalLink className="w-3 h-3" />
+                                        </a>
+                                    </div>
+                                    <p className="text-white/60 text-sm mb-4">{contracts.sui.description}</p>
+                                    <div className="bg-black/50 rounded-lg p-3">
+                                        <code className="text-xs text-green-400 break-all">
+                                            {contracts.sui.packageId}
+                                        </code>
+                                    </div>
                                 </div>
-                                <p className="text-white/60 text-sm mb-4">Sui Move contract for market making and arbitrage on DeepBook.</p>
-                                <div className="bg-black/50 rounded-lg p-3">
-                                    <code className="text-xs text-green-400 break-all">
-                                        0x6ce7728c4d4201c1ea33154063b1fa3e810dae604e88d5a3054c9e662cec7ef8
-                                    </code>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Uniswap v4 Integration */}
+                    <section id="uniswap-v4" className="mb-16">
+                        <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                            <ArrowRightLeft className="w-6 h-6 text-violet-400" />
+                            Uniswap v4 Integration
+                        </h2>
+                        <div className="bg-gradient-to-r from-pink-500/10 to-violet-500/10 border border-pink-500/20 rounded-xl p-6">
+                            <p className="text-white/70 mb-4">
+                                MoltQore uses the official Uniswap v4 PoolManager on Base Sepolia for autonomous LP management.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="bg-black/30 rounded-lg p-4">
+                                    <h4 className="font-semibold text-white mb-2">🎣 AgentRebalancerHook</h4>
+                                    <p className="text-xs text-white/50 mb-2">Implements afterSwap() callback for automatic LP rebalancing based on price drift.</p>
+                                    <code className="text-xs text-pink-400">0xdB045ac6bA8d7903fD...49</code>
+                                </div>
+                                <div className="bg-black/30 rounded-lg p-4">
+                                    <h4 className="font-semibold text-white mb-2">🏊 PoolManager</h4>
+                                    <p className="text-xs text-white/50 mb-2">Official Uniswap v4 PoolManager (singleton).</p>
+                                    <code className="text-xs text-pink-400">0x05E73354cFDd6745C3...08</code>
                                 </div>
                             </div>
                         </div>
@@ -280,7 +319,7 @@ cd apps/api && source venv/bin/activate && uvicorn main:app --reload`}
                         <div id="byoa" className="bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20 rounded-xl p-6 mb-6">
                             <h3 className="text-lg font-semibold text-white mb-3">🤖 Hybrid AI Architecture</h3>
                             <p className="text-white/70 text-sm mb-4">
-                                DeepMind Vaults supports "Bring Your Own AI" - you're not locked into any single AI provider.
+                                MoltQore supports "Bring Your Own AI" - you're not locked into any single AI provider.
                             </p>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -303,6 +342,44 @@ cd apps/api && source venv/bin/activate && uvicorn main:app --reload`}
                                     <div className="text-2xl mb-2">⚙️</div>
                                     <h4 className="font-semibold text-white mb-1">Custom Endpoint</h4>
                                     <p className="text-xs text-white/50">Local LLM or any API</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Transaction Evidence */}
+                    <section className="mb-16">
+                        <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                            ✅ Verified Transactions
+                        </h2>
+                        <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6">
+                            <p className="text-white/70 mb-4">
+                                All demo transactions are <strong className="text-green-400">REAL</strong> and verifiable on blockchain explorers:
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-green-400 rounded-full" />
+                                    <span className="text-white/70">mintAgent (ERC-8004)</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-green-400 rounded-full" />
+                                    <span className="text-white/70">registerAgentENS</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-green-400 rounded-full" />
+                                    <span className="text-white/70">logDecisionToENS</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-green-400 rounded-full" />
+                                    <span className="text-white/70">openPosition (Uniswap v4 Hook)</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-cyan-400 rounded-full" />
+                                    <span className="text-white/70">create_vault (Sui)</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-cyan-400 rounded-full" />
+                                    <span className="text-white/70">execute_market_making (Sui PTB)</span>
                                 </div>
                             </div>
                         </div>
