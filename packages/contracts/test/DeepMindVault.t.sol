@@ -13,7 +13,7 @@ contract DeepMindVaultTest is Test {
     address public executor;
 
     // Test constants
-    string constant ENS_NAME = "agent-1.deepmind.eth";
+    string constant ENS_NAME = "agent-1.moltqore.eth";
     bytes32 constant STRATEGY_HASH = keccak256("balanced-strategy");
     bytes32 constant SUI_VAULT = bytes32(uint256(0x123));
 
@@ -56,7 +56,7 @@ contract DeepMindVaultTest is Test {
     function testMintMultipleAgents() public {
         uint256 agent1 = vault.mintAgent(ENS_NAME, STRATEGY_HASH, SUI_VAULT);
         uint256 agent2 = vault.mintAgent(
-            "agent-2.deepmind.eth",
+            "agent-2.moltqore.eth",
             keccak256("aggressive"),
             bytes32(uint256(0x456))
         );
