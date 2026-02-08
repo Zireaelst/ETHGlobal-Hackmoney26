@@ -1,0 +1,24 @@
+{
+    "include": [
+        "**/*.py"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        ".venv",
+        "venv"
+    ],
+    "typeCheckingMode": "basic",
+    "pythonVersion": "3.11",
+    "pythonPlatform": "Darwin",
+    "reportMissingImports": "warning",
+    "reportMissingTypeStubs": "none",
+    "executionEnvironments": [
+        {
+            "root": ".",
+            "extraPaths": [
+                "."
+            ]
+        }
+    ]
+}

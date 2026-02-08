@@ -1,19 +1,22 @@
 """
 FastAPI Main Application - DeepMind Vaults API
 """
-from fastapi import FastAPI, BackgroundTasks, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, BackgroundTasks, HTTPException  # type: ignore
+from fastapi.middleware.cors import CORSMiddleware  # type: ignore
 from contextlib import asynccontextmanager
-from pydantic import BaseModel
+from pydantic import BaseModel  # type: ignore
 from typing import List, Optional
 import os
 import asyncio
-from dotenv import load_dotenv
 
-from services.opportunity_scanner import OpportunityScanner
-from services.decision_engine import AgentDecisionEngine
+try:
+    from dotenv import load_dotenv  # type: ignore
+    load_dotenv()
+except ImportError:
+    pass
 
-load_dotenv()
+from services.opportunity_scanner import OpportunityScanner  # type: ignore
+from services.decision_engine import AgentDecisionEngine  # type: ignore
 
 # Global instances
 scanner: Optional[OpportunityScanner] = None
