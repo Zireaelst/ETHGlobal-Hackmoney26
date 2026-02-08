@@ -75,6 +75,7 @@ Every AI decision, reasoning, and trade result is logged on-chain via **ENS text
 | **DeepMindVault** | [`0xbAD7056563F0b00C29c08FF06CA22aE94cC5fa1c`](https://sepolia.basescan.org/address/0xbAD7056563F0b00C29c08FF06CA22aE94cC5fa1c) | ERC-8004 Agent NFT |
 | **ENSTextRecordManager** | [`0xab8Fa229B57513d3EB11549AC4641FF1F4f469a3`](https://sepolia.basescan.org/address/0xab8Fa229B57513d3EB11549AC4641FF1F4f469a3) | On-chain decision logs |
 | **MockPublicResolver** | [`0xD257737006c06C99709513A0491D585D5689316b`](https://sepolia.basescan.org/address/0xD257737006c06C99709513A0491D585D5689316b) | ENS text record storage |
+| **AgentRebalancerHook** | [`0xdB045ac6bA8d7903fD3a566bFBf208955481dA49`](https://sepolia.basescan.org/address/0xdB045ac6bA8d7903fD3a566bFBf208955481dA49) | Uniswap v4 LP rebalancer |
 
 ### Sui Testnet
 
