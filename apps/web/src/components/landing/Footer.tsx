@@ -47,7 +47,7 @@ export function Footer() {
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
                                 <Brain className="w-6 h-6 text-white" />
                             </div>
-                            <span className="font-bold text-lg text-white">DeepMind Vaults</span>
+                            <span className="font-bold text-lg text-white">MoltQore</span>
                         </Link>
                         <p className="text-sm text-zinc-500 mb-4">
                             AI-powered autonomous DeFi portfolio management.
@@ -138,7 +138,7 @@ export function Footer() {
                 {/* Copyright */}
                 <div className="mt-8 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-xs text-zinc-600">
-                        © 2026 DeepMind Vaults. All rights reserved.
+                        © 2026 MoltQore. All rights reserved.
                     </p>
                     <p className="text-xs text-zinc-600">
                         Built with ❤️ for ETHGlobal HackMoney 2026

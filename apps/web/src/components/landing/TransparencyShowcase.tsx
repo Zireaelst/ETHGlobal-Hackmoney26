@@ -104,7 +104,7 @@ export function TransparencyShowcase() {
 
                             <div className="space-y-3">
                                 <div className="text-accent-400">
-                                    <span className="text-accent-600">$</span> ens resolve agent-42.deepmind.eth
+                                    <span className="text-accent-600">$</span> ens resolve agent-42.moltqore.eth
                                 </div>
 
                                 <div className="text-green-400 space-y-1">
